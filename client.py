@@ -7,11 +7,11 @@ import tkinter
 from Crypto.Cipher import AES
 title_chat = 'Chatter'
 key = None
-cipher = None
+iv = None
 
 def receive():
     """Handles receiving of messages."""
-    global title_chat, key, cipher
+    global title_chat, key, cipher, iv
     while True:
         try:
             if key == None:
@@ -19,18 +19,16 @@ def receive():
                 # Split the message into parts using the '::' delimiter
                 msg_parts = msg.split("::")
                 # Extract the key from the message and convert it back to bytes
-
-                key = msg_parts[1]
+                iv = bytes.fromhex(msg_parts[2])
+                key= bytes.fromhex(msg_parts[1])
                 msg = msg_parts[0]
-                key = bytes.fromhex(key)
-                cipher = AES.new(key, AES.MODE_CBC)
             else:
                 encrypted_msg = client_socket.recv(BUFSIZ)
 
                 if len(encrypted_msg) % 16 != 0:
                     print(len(encrypted_msg))
                     print(len(encrypted_msg)%16)
-                decrypt_cipher = AES.new(key, AES.MODE_CBC, cipher.iv)
+                decrypt_cipher = AES.new(key, AES.MODE_CBC, iv)
                 decrypted_msg = decrypt_cipher.decrypt(encrypted_msg)
                 decoded_msg = unpad(decrypted_msg).decode('utf-8')
                 msg = decoded_msg
@@ -51,10 +49,10 @@ def send(event=None):  # event is passed by binders.
         client_socket.close()
         top.quit()
     else:
-        print("Reaches the padding")
+        encrypt_cipher = AES.new(key, AES.MODE_CBC, iv)
         # Encrypt the message using the cipher
         padded_msg = pad(msg.encode("utf-8"), AES.block_size)
-        encrypted_msg = cipher.encrypt(padded_msg)
+        encrypted_msg = encrypt_cipher.encrypt(padded_msg)
         # Send the encrypted message over the network
         client_socket.send(encrypted_msg)
 
