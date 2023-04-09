@@ -4,9 +4,7 @@ import argparse
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 import tkinter
-from Crypto.Cipher import AES
 from nacl.secret import SecretBox
-import nacl.utils
 from nacl.public import PrivateKey, PublicKey, Box
 title_chat = 'Chatter'
 symmetric_key = None
@@ -33,6 +31,8 @@ def receive():
                 server_public_key = PublicKey(server_public_key_bytes)
                 client_box = Box(client_private_key, server_public_key)
                 symmetric_key = client_box.decrypt(bytes.fromhex(encrypted_symmetric_key))
+
+                
                 client_socket.send(b"hello")
                 msg = client_socket.recv(BUFSIZ)
                 box = SecretBox(symmetric_key)

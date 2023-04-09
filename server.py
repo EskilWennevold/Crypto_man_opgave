@@ -3,8 +3,6 @@
 import argparse
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
-from Crypto.Random import get_random_bytes
-from Crypto.Cipher import AES
 import nacl.utils
 from nacl.secret import SecretBox
 from nacl.public import PrivateKey, Box
